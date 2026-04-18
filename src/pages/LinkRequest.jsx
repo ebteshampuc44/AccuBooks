@@ -1,33 +1,64 @@
 import React, { useState } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
+import { useAuth } from '../contexts/AuthContext';
 
 const LinkRequest = () => {
+  const { user } = useAuth();
   const [phone, setPhone] = useState('');
   const [message, setMessage] = useState('');
   const [showQR, setShowQR] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [countryCode, setCountryCode] = useState('+880'); // বাংলাদেশের জন্য +880
 
   const handleSendRequest = (e) => {
     e.preventDefault();
+    
+    // ফোন নম্বর ভ্যালিডেশন
+    const cleanPhone = phone.replace(/\D/g, '');
+    if (cleanPhone.length !== 10 && cleanPhone.length !== 11) {
+      setMessage('Please enter a valid 10 or 11 digit Bangladesh phone number');
+      setTimeout(() => setMessage(''), 3000);
+      return;
+    }
+    
     setIsLoading(true);
     
     setTimeout(() => {
-      setMessage(`Link request sent to ${phone}! They will be able to sync transactions with you.`);
+      const fullNumber = `${countryCode}${cleanPhone}`;
+      setMessage(`Link request sent to ${fullNumber}! They will be able to sync transactions with you.`);
       setPhone('');
       setIsLoading(false);
+      
+      // 3 সেকেন্ড পর মেসেজ ক্লিয়ার করুন
+      setTimeout(() => setMessage(''), 3000);
     }, 1000);
   };
 
   const generateQRData = () => {
     const userData = {
-      userId: 1,
-      name: 'John Doe',
-      business: 'ACME Industries',
-      phone: '9876543210',
+      userId: user?.id || 'demo_user_001',
+      name: user?.name || 'John Doe',
+      business: user?.businessName || 'ACME Industries',
+      phone: user?.phone || '01712345678',
+      email: user?.email || 'user@example.com',
       timestamp: Date.now(),
     };
     return JSON.stringify(userData);
   };
+
+  // বাংলাদেশি অপারেটর চেক করার ফাংশন
+  const getOperatorInfo = (number) => {
+    const cleanNumber = number.replace(/\D/g, '');
+    if (cleanNumber.startsWith('17')) return { name: 'Grameenphone', color: 'text-red-600' };
+    if (cleanNumber.startsWith('18')) return { name: 'Robi', color: 'text-purple-600' };
+    if (cleanNumber.startsWith('19')) return { name: 'Banglalink', color: 'text-blue-600' };
+    if (cleanNumber.startsWith('14')) return { name: 'Teletalk', color: 'text-green-600' };
+    if (cleanNumber.startsWith('15')) return { name: 'Airtel', color: 'text-orange-600' };
+    if (cleanNumber.startsWith('16')) return { name: 'Robi', color: 'text-purple-600' };
+    return null;
+  };
+
+  const operator = getOperatorInfo(phone);
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
@@ -37,6 +68,7 @@ const LinkRequest = () => {
         <p className="text-gray-500 mt-2">
           Connect with other AccuBooks users for automatic transaction syncing
         </p>
+        <p className="text-xs text-green-600 mt-1">✓ Bangladesh mobile numbers supported</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -50,23 +82,58 @@ const LinkRequest = () => {
               <h2 className="text-xl font-bold text-gray-900">Send Link Request</h2>
             </div>
             <p className="text-sm text-gray-500 mb-4">
-              Enter the phone number of the user you want to connect with
+              Enter the Bangladesh mobile number of the user you want to connect with
             </p>
 
             <form onSubmit={handleSendRequest}>
               <div>
-                <label className="block text-gray-700 font-medium mb-2">Phone Number</label>
-                <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">+91</span>
-                  <input
-                    type="tel"
-                    placeholder="9876543210"
-                    className="w-full pl-12 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    required
-                  />
+                <label className="block text-gray-700 font-medium mb-2">Mobile Number</label>
+                <div className="flex gap-2">
+                  {/* Country Code Select */}
+                  <div className="relative w-28">
+                    <select
+                      value={countryCode}
+                      onChange={(e) => setCountryCode(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 bg-white appearance-none"
+                    >
+                      <option value="+880">🇧🇩 +880 (BD)</option>
+                      <option value="+91">🇮🇳 +91 (India)</option>
+                      <option value="+1">🇺🇸 +1 (USA)</option>
+                      <option value="+44">🇬🇧 +44 (UK)</option>
+                    </select>
+                    <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+                      <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </div>
+                  </div>
+                  
+                  {/* Phone Input */}
+                  <div className="relative flex-1">
+                    <input
+                      type="tel"
+                      placeholder="1712345678"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
+                      value={phone}
+                      onChange={(e) => {
+                        const value = e.target.value.replace(/\D/g, '').slice(0, 11);
+                        setPhone(value);
+                      }}
+                      required
+                    />
+                  </div>
                 </div>
+                
+                {/* Operator Info */}
+                {operator && phone.length >= 3 && (
+                  <p className={`text-xs mt-1 ${operator.color}`}>
+                    {operator.name} operator detected
+                  </p>
+                )}
+                
+                <p className="text-xs text-gray-400 mt-2">
+                  Example: 1712345678 (Grameenphone), 1812345678 (Robi), 1912345678 (Banglalink)
+                </p>
               </div>
 
               <button
@@ -87,18 +154,24 @@ const LinkRequest = () => {
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
                     </svg>
-                    Send Request
+                    Send Link Request
                   </>
                 )}
               </button>
             </form>
 
             {message && (
-              <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg flex items-start gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-green-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <div className={`mt-4 p-3 rounded-lg flex items-start gap-2 ${
+                message.includes('valid') ? 'bg-red-50 border border-red-200' : 'bg-green-50 border border-green-200'
+              }`}>
+                <svg xmlns="http://www.w3.org/2000/svg" className={`h-5 w-5 flex-shrink-0 ${
+                  message.includes('valid') ? 'text-red-600' : 'text-green-600'
+                }`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                <span className="text-sm text-green-800">{message}</span>
+                <span className={`text-sm ${
+                  message.includes('valid') ? 'text-red-800' : 'text-green-800'
+                }`}>{message}</span>
               </div>
             )}
           </div>
@@ -160,7 +233,7 @@ const LinkRequest = () => {
               <tbody>
                 <tr className="border-b border-gray-100 hover:bg-gray-50">
                   <td className="py-3 px-4 font-medium text-gray-900">Raj Traders</td>
-                  <td className="py-3 px-4 text-gray-600">9876543210</td>
+                  <td className="py-3 px-4 text-gray-600">+880 1712345678</td>
                   <td className="py-3 px-4">
                     <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-700">
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -182,7 +255,29 @@ const LinkRequest = () => {
                 </tr>
                 <tr className="border-b border-gray-100 hover:bg-gray-50">
                   <td className="py-3 px-4 font-medium text-gray-900">Sharma Enterprises</td>
-                  <td className="py-3 px-4 text-gray-600">9876543211</td>
+                  <td className="py-3 px-4 text-gray-600">+880 1812345678</td>
+                  <td className="py-3 px-4">
+                    <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-700">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      Pending
+                    </span>
+                  </td>
+                  <td className="py-3 px-4 text-center">
+                    <div className="flex gap-2 justify-center">
+                      <button className="px-3 py-1 text-xs font-medium bg-green-50 text-green-700 rounded-md hover:bg-green-100 transition-colors duration-150">
+                        Accept
+                      </button>
+                      <button className="px-3 py-1 text-xs font-medium bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors duration-150">
+                        Decline
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+                <tr className="hover:bg-gray-50">
+                  <td className="py-3 px-4 font-medium text-gray-900">Banglalink Business</td>
+                  <td className="py-3 px-4 text-gray-600">+880 1912345678</td>
                   <td className="py-3 px-4">
                     <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-700">
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -206,8 +301,27 @@ const LinkRequest = () => {
             </table>
           </div>
 
+          {/* Bangladesh Info Box */}
+          <div className="mt-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+            <div className="flex gap-3">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-green-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <div>
+                <h3 className="font-semibold text-gray-900">Bangladesh Mobile Networks</h3>
+                <p className="text-sm text-gray-700 mt-1">
+                  Supported operators: <strong>Grameenphone (017)</strong>, <strong>Robi (018, 016)</strong>, 
+                  <strong> Banglalink (019)</strong>, <strong>Teletalk (014)</strong>, <strong>Airtel (015)</strong>
+                </p>
+                <p className="text-xs text-gray-500 mt-2">
+                  Enter 10 or 11 digit mobile number without country code. The system will automatically detect your operator.
+                </p>
+              </div>
+            </div>
+          </div>
+
           {/* Info Box */}
-          <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+          <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
             <div className="flex gap-3">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />

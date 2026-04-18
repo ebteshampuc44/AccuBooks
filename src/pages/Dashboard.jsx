@@ -15,15 +15,15 @@ const Dashboard = () => {
   ];
 
   const quickActions = [
-    { title: 'New Transaction', path: '/create-transaction', gradient: 'from-blue-500 to-blue-600', hover: 'from-blue-600 to-blue-700', icon: 'M12 4v16m8-8H4' },
-    { title: 'Add Contact', path: '/add-contact', gradient: 'from-teal-500 to-teal-600', hover: 'from-teal-600 to-teal-700', icon: 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z' },
-    { title: 'Link Account', path: '/link-request', gradient: 'from-purple-500 to-purple-600', hover: 'from-purple-600 to-purple-700', icon: 'M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.102m3.172-3.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.102' },
-    { title: 'View Ledger', path: '/ledger', gradient: 'from-gray-600 to-gray-700', hover: 'from-gray-700 to-gray-800', icon: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z' },
+    { title: 'New Transaction', path: '/create-transaction', gradient: 'from-blue-500 to-blue-600', icon: 'M12 4v16m8-8H4' },
+    { title: 'Add Contact', path: '/add-contact', gradient: 'from-teal-500 to-teal-600', icon: 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z' },
+    { title: 'Link Account', path: '/link-request', gradient: 'from-purple-500 to-purple-600', icon: 'M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.102m3.172-3.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.102' },
+    { title: 'View Ledger', path: '/ledger', gradient: 'from-gray-600 to-gray-700', icon: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z' },
   ];
 
   return (
     <div className="space-y-8">
-      {/* Welcome Section - Modern Hero Card */}
+      {/* Welcome Section */}
       <div className="relative overflow-hidden bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 rounded-2xl shadow-xl">
         <div className="absolute inset-0 bg-black opacity-20"></div>
         <div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-10 rounded-full filter blur-3xl -mr-32 -mt-32"></div>
@@ -33,7 +33,7 @@ const Dashboard = () => {
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
             <div>
               <h1 className="text-4xl font-bold mb-2 tracking-tight">
-                Welcome back, {user?.name}!
+                Welcome back, {user?.name?.split(' ')[0]}!
               </h1>
               <p className="text-blue-100 text-lg mb-3">
                 {user?.businessName} • {user?.businessType}
@@ -56,7 +56,7 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Stats Grid - Modern Cards */}
+      {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {stats.map((stat, idx) => (
           <div key={idx} className="group relative bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 overflow-hidden">
@@ -82,7 +82,7 @@ const Dashboard = () => {
         ))}
       </div>
 
-      {/* Quick Actions - Modern Buttons */}
+      {/* Quick Actions */}
       <div className="bg-white rounded-xl shadow-lg overflow-hidden">
         <div className="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 border-b border-gray-200">
           <div className="flex items-center gap-3">
@@ -96,7 +96,7 @@ const Dashboard = () => {
               <Link
                 key={idx}
                 to={action.path}
-                className={`group relative overflow-hidden bg-gradient-to-r ${action.gradient} hover:from-${action.hover} rounded-xl shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1`}
+                className={`group relative overflow-hidden bg-gradient-to-r ${action.gradient} rounded-xl shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1`}
               >
                 <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
                 <div className="relative px-4 py-3 flex items-center justify-center gap-2 text-white font-semibold">
@@ -111,7 +111,7 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Recent Transactions - Modern Table */}
+      {/* Recent Transactions */}
       <div className="bg-white rounded-xl shadow-lg overflow-hidden">
         <div className="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 border-b border-gray-200">
           <div className="flex justify-between items-center">

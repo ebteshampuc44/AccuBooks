@@ -4,7 +4,6 @@ import { AuthProvider } from './contexts/AuthContext';
 import PrivateRoute from './components/PrivateRoute';
 import Layout from './components/Layout';
 import Login from './pages/Login';
-import VerifyOTP from './pages/VerifyOTP';
 import Dashboard from './pages/Dashboard';
 import Contacts from './pages/Contacts';
 import AddContact from './pages/AddContact';
@@ -21,11 +20,8 @@ function App() {
     <Router>
       <AuthProvider>
         <Routes>
-          {/* Public Routes */}
           <Route path="/login" element={<Login />} />
-          <Route path="/verify-otp" element={<VerifyOTP />} />
           
-          {/* Private Routes (requires authentication) */}
           <Route element={<PrivateRoute />}>
             <Route element={<Layout />}>
               <Route path="/" element={<Dashboard />} />

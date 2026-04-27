@@ -1,3 +1,4 @@
+// firebase.js
 import { initializeApp } from 'firebase/app';
 import { 
   getAuth, 
@@ -63,24 +64,21 @@ export const signInWithGoogle = async () => {
   }
 };
 
-// Upload Profile Picture - Simplified version
+// Upload Profile Picture
 export const uploadProfilePicture = async (userId, file) => {
   try {
     console.log('Starting upload for user:', userId);
     console.log('File:', file.name, file.type, file.size);
     
-    // Create a unique filename
     const timestamp = Date.now();
     const fileName = `profile_${userId}_${timestamp}.jpg`;
     const storageRef = ref(storage, `profile_pictures/${fileName}`);
     
     console.log('Storage path:', `profile_pictures/${fileName}`);
     
-    // Upload file
     const snapshot = await uploadBytes(storageRef, file);
     console.log('Upload successful:', snapshot);
     
-    // Get download URL
     const downloadURL = await getDownloadURL(storageRef);
     console.log('Download URL:', downloadURL);
     

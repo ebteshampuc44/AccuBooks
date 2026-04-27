@@ -6,13 +6,63 @@ import { Link } from 'react-router-dom';
 const Dashboard = () => {
   const { user } = useAuth();
 
+  // Calculate real data from user's contacts and transactions
+  const contacts = user?.contacts || [];
+  const buyers = contacts.filter(c => c.type === 'buyer');
+  const suppliers = contacts.filter(c => c.type === 'supplier');
+  
+  // Calculate total receivable from buyers who owe money
+  const totalReceivable = buyers.reduce((sum, c) => sum + (c.totalDue > 0 ? c.totalDue : 0), 0);
+  
+  // Calculate total payable to suppliers
+  const totalPayable = suppliers.reduce((sum, c) => sum + (c.totalDue > 0 ? c.totalDue : 0), 0);
+  
+  // Current balance = Receivable - Payable
+  const currentBalance = totalReceivable - totalPayable;
+
   const stats = [
-    { title: 'Total Receivable', value: `₹${(user?.totalReceivable || 0).toLocaleString()}`, color: 'from-emerald-500 to-green-600', bgLight: 'bg-emerald-50', icon: 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z' },
-    { title: 'Total Payable', value: `₹${(user?.totalPayable || 0).toLocaleString()}`, color: 'from-rose-500 to-red-600', bgLight: 'bg-rose-50', icon: 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z' },
-    { title: 'Current Balance', value: `₹${(user?.currentBalance || 0).toLocaleString()}`, color: 'from-blue-500 to-indigo-600', bgLight: 'bg-blue-50', icon: 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z' },
-    { title: 'Linked Accounts', value: user?.linkedAccounts || 0, color: 'from-purple-500 to-violet-600', bgLight: 'bg-purple-50', icon: 'M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.102m3.172-3.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.102' },
-    { title: 'Buyers', value: user?.buyersCount || 0, color: 'from-teal-500 to-cyan-600', bgLight: 'bg-teal-50', icon: 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z' },
-    { title: 'Suppliers', value: user?.suppliersCount || 0, color: 'from-orange-500 to-amber-600', bgLight: 'bg-orange-50', icon: 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4' },
+    { 
+      title: 'Total Receivable', 
+      value: `₹${totalReceivable.toLocaleString()}`, 
+      color: 'from-emerald-500 to-green-600', 
+      bgLight: 'bg-emerald-50', 
+      icon: 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z' 
+    },
+    { 
+      title: 'Total Payable', 
+      value: `₹${totalPayable.toLocaleString()}`, 
+      color: 'from-rose-500 to-red-600', 
+      bgLight: 'bg-rose-50', 
+      icon: 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z' 
+    },
+    { 
+      title: 'Current Balance', 
+      value: `₹${currentBalance.toLocaleString()}`, 
+      color: 'from-blue-500 to-indigo-600', 
+      bgLight: 'bg-blue-50', 
+      icon: 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z' 
+    },
+    { 
+      title: 'Linked Accounts', 
+      value: user?.linkedContacts?.length || 0, 
+      color: 'from-purple-500 to-violet-600', 
+      bgLight: 'bg-purple-50', 
+      icon: 'M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.102m3.172-3.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.102' 
+    },
+    { 
+      title: 'Buyers', 
+      value: buyers.length, 
+      color: 'from-teal-500 to-cyan-600', 
+      bgLight: 'bg-teal-50', 
+      icon: 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z' 
+    },
+    { 
+      title: 'Suppliers', 
+      value: suppliers.length, 
+      color: 'from-orange-500 to-amber-600', 
+      bgLight: 'bg-orange-50', 
+      icon: 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4' 
+    },
   ];
 
   const quickActions = [
@@ -203,6 +253,50 @@ const Dashboard = () => {
             </Link>
           </div>
         )}
+      </div>
+
+      {/* Getting Started Guide for New Users */}
+      {contacts.length === 0 && recentTransactions.length === 0 && (
+        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-200">
+          <div className="flex items-start gap-4">
+            <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+              <svg className="w-6 h-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <div className="flex-1">
+              <h3 className="font-bold text-gray-900 text-lg">Welcome to AccuBooks! 🎉</h3>
+              <p className="text-gray-600 mt-1">Your account is ready. Here's how to get started:</p>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                <div className="flex items-center gap-2 text-sm text-gray-700">
+                  <span className="w-6 h-6 rounded-full bg-blue-200 text-blue-800 flex items-center justify-center text-xs font-bold">1</span>
+                  <span>Complete your business profile</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm text-gray-700">
+                  <span className="w-6 h-6 rounded-full bg-blue-200 text-blue-800 flex items-center justify-center text-xs font-bold">2</span>
+                  <span>Add your buyers and suppliers</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm text-gray-700">
+                  <span className="w-6 h-6 rounded-full bg-blue-200 text-blue-800 flex items-center justify-center text-xs font-bold">3</span>
+                  <span>Create your first transaction</span>
+                </div>
+              </div>
+              <div className="mt-4 flex flex-wrap gap-3">
+                <Link to="/profile" className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors">
+                  Complete Profile →
+                </Link>
+                <Link to="/add-contact" className="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors">
+                  Add Contact
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Data Persistence Info */}
+      <div className="text-center text-xs text-gray-400">
+        <p>✅ Your data is automatically saved. You can log out and log back in anytime.</p>
       </div>
     </div>
   );

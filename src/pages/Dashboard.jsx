@@ -1,3 +1,4 @@
+// pages/Dashboard.jsx
 import React from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { Link } from 'react-router-dom';
@@ -6,9 +7,9 @@ const Dashboard = () => {
   const { user } = useAuth();
 
   const stats = [
-    { title: 'Total Receivable', value: `₹${user?.totalReceivable?.toLocaleString()}`, color: 'from-emerald-500 to-green-600', bgLight: 'bg-emerald-50', icon: 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z' },
-    { title: 'Total Payable', value: `₹${user?.totalPayable?.toLocaleString()}`, color: 'from-rose-500 to-red-600', bgLight: 'bg-rose-50', icon: 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z' },
-    { title: 'Current Balance', value: `₹${user?.currentBalance?.toLocaleString()}`, color: 'from-blue-500 to-indigo-600', bgLight: 'bg-blue-50', icon: 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z' },
+    { title: 'Total Receivable', value: `₹${(user?.totalReceivable || 0).toLocaleString()}`, color: 'from-emerald-500 to-green-600', bgLight: 'bg-emerald-50', icon: 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z' },
+    { title: 'Total Payable', value: `₹${(user?.totalPayable || 0).toLocaleString()}`, color: 'from-rose-500 to-red-600', bgLight: 'bg-rose-50', icon: 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z' },
+    { title: 'Current Balance', value: `₹${(user?.currentBalance || 0).toLocaleString()}`, color: 'from-blue-500 to-indigo-600', bgLight: 'bg-blue-50', icon: 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z' },
     { title: 'Linked Accounts', value: user?.linkedAccounts || 0, color: 'from-purple-500 to-violet-600', bgLight: 'bg-purple-50', icon: 'M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.102m3.172-3.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.102' },
     { title: 'Buyers', value: user?.buyersCount || 0, color: 'from-teal-500 to-cyan-600', bgLight: 'bg-teal-50', icon: 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z' },
     { title: 'Suppliers', value: user?.suppliersCount || 0, color: 'from-orange-500 to-amber-600', bgLight: 'bg-orange-50', icon: 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4' },
@@ -20,6 +21,8 @@ const Dashboard = () => {
     { title: 'Link Account', path: '/link-request', gradient: 'from-purple-500 to-purple-600', icon: 'M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.102m3.172-3.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.102' },
     { title: 'View Ledger', path: '/ledger', gradient: 'from-gray-600 to-gray-700', icon: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z' },
   ];
+
+  const recentTransactions = user?.recentTransactions || [];
 
   return (
     <div className="space-y-8">
@@ -33,17 +36,27 @@ const Dashboard = () => {
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
             <div>
               <h1 className="text-4xl font-bold mb-2 tracking-tight">
-                Welcome back, {user?.name?.split(' ')[0]}!
+                Welcome back, {user?.name?.split(' ')[0] || 'User'}!
               </h1>
               <p className="text-blue-100 text-lg mb-3">
-                {user?.businessName} • {user?.businessType}
+                {user?.businessName || 'Set up your business profile'} • {user?.businessType || 'Complete profile'}
               </p>
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-white/20 backdrop-blur-sm rounded-full text-sm">
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                </svg>
-                <span className="font-medium">GST: {user?.gst}</span>
-              </div>
+              {user?.gst && (
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-white/20 backdrop-blur-sm rounded-full text-sm">
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                  </svg>
+                  <span className="font-medium">GST: {user.gst}</span>
+                </div>
+              )}
+              {!user?.businessName && (
+                <Link to="/profile" className="inline-flex items-center gap-2 px-3 py-1.5 bg-white/20 backdrop-blur-sm rounded-full text-sm hover:bg-white/30 transition-colors">
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                  </svg>
+                  Complete Profile
+                </Link>
+              )}
             </div>
             
             <div className="mt-4 md:mt-0">
@@ -128,58 +141,56 @@ const Dashboard = () => {
           </div>
         </div>
         
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="bg-gray-50 border-b border-gray-200">
-                <th className="text-left py-4 px-6 text-gray-600 font-semibold text-sm">Date</th>
-                <th className="text-left py-4 px-6 text-gray-600 font-semibold text-sm">Type</th>
-                <th className="text-left py-4 px-6 text-gray-600 font-semibold text-sm">Counterparty</th>
-                <th className="text-right py-4 px-6 text-gray-600 font-semibold text-sm">Amount</th>
-                <th className="text-right py-4 px-6 text-gray-600 font-semibold text-sm">Balance After</th>
-              </tr>
-            </thead>
-            <tbody>
-              {user?.recentTransactions?.map((tx, idx) => (
-                <tr key={tx.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors group">
-                  <td className="py-3 px-6 text-gray-600 text-sm">{tx.date}</td>
-                  <td className="py-3 px-6">
-                    <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${
-                      tx.type === 'sale' ? 'bg-emerald-100 text-emerald-700' : 
-                      tx.type === 'purchase' ? 'bg-rose-100 text-rose-700' : 
-                      'bg-blue-100 text-blue-700'
-                    }`}>
-                      <span className={`w-1.5 h-1.5 rounded-full mr-1.5 ${
-                        tx.type === 'sale' ? 'bg-emerald-500' : 
-                        tx.type === 'purchase' ? 'bg-rose-500' : 
-                        'bg-blue-500'
-                      }`}></span>
-                      {tx.type === 'sale' ? 'Sale' : tx.type === 'purchase' ? 'Purchase' : 'Payment'}
-                    </span>
-                  </td>
-                  <td className="py-3 px-6">
-                    <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center text-xs font-bold text-gray-600">
-                        {tx.counterparty.charAt(0)}
-                      </div>
-                      <span className="text-gray-800 font-medium text-sm">{tx.counterparty}</span>
-                    </div>
-                  </td>
-                  <td className={`py-3 px-6 text-right font-bold text-sm ${
-                    tx.type === 'sale' ? 'text-emerald-600' : 'text-rose-600'
-                  }`}>
-                    {tx.type === 'sale' ? '+' : '-'} ₹{tx.amount.toLocaleString()}
-                  </td>
-                  <td className="py-3 px-6 text-right text-gray-700 font-medium text-sm">
-                    ₹{tx.balanceAfter.toLocaleString()}
-                  </td>
+        {recentTransactions.length > 0 ? (
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="bg-gray-50 border-b border-gray-200">
+                  <th className="text-left py-4 px-6 text-gray-600 font-semibold text-sm">Date</th>
+                  <th className="text-left py-4 px-6 text-gray-600 font-semibold text-sm">Type</th>
+                  <th className="text-left py-4 px-6 text-gray-600 font-semibold text-sm">Counterparty</th>
+                  <th className="text-left py-4 px-6 text-gray-600 font-semibold text-sm">Reference</th>
+                  <th className="text-right py-4 px-6 text-gray-600 font-semibold text-sm">Amount</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        
-        {(!user?.recentTransactions || user.recentTransactions.length === 0) && (
+              </thead>
+              <tbody>
+                {recentTransactions.slice(0, 5).map((tx) => (
+                  <tr key={tx.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors group">
+                    <td className="py-3 px-6 text-gray-600 text-sm">{tx.date}</td>
+                    <td className="py-3 px-6">
+                      <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${
+                        tx.type === 'sale' ? 'bg-emerald-100 text-emerald-700' : 
+                        tx.type === 'purchase' ? 'bg-rose-100 text-rose-700' : 
+                        'bg-blue-100 text-blue-700'
+                      }`}>
+                        <span className={`w-1.5 h-1.5 rounded-full mr-1.5 ${
+                          tx.type === 'sale' ? 'bg-emerald-500' : 
+                          tx.type === 'purchase' ? 'bg-rose-500' : 
+                          'bg-blue-500'
+                        }`}></span>
+                        {tx.type === 'sale' ? 'Sale' : tx.type === 'purchase' ? 'Purchase' : 'Payment'}
+                      </span>
+                    </td>
+                    <td className="py-3 px-6">
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center text-xs font-bold text-gray-600">
+                          {tx.counterparty?.charAt(0) || '?'}
+                        </div>
+                        <span className="text-gray-800 font-medium text-sm">{tx.counterparty}</span>
+                      </div>
+                    </td>
+                    <td className="py-3 px-6 text-gray-500 text-sm font-mono">{tx.reference}</td>
+                    <td className={`py-3 px-6 text-right font-bold text-sm ${
+                      tx.type === 'sale' ? 'text-emerald-600' : 'text-rose-600'
+                    }`}>
+                      {tx.type === 'sale' ? '+' : '-'} ₹{tx.amount.toLocaleString()}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
           <div className="text-center py-12">
             <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
               <svg className="w-8 h-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">

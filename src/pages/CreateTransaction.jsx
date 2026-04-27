@@ -1,8 +1,11 @@
+// pages/CreateTransaction.jsx
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 
 const CreateTransaction = () => {
   const navigate = useNavigate();
+  const { user, addTransaction } = useAuth();
   const [formData, setFormData] = useState({
     type: 'sale',
     counterpartyId: '',
@@ -12,33 +15,56 @@ const CreateTransaction = () => {
     description: '',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState('');
 
-  const contacts = [
-    { id: 1, name: 'Raj Traders', type: 'buyer', linked: true },
-    { id: 2, name: 'Sharma Enterprises', type: 'buyer', linked: false },
-    { id: 3, name: 'Gupta Store', type: 'buyer', linked: true },
-    { id: 4, name: 'Singh Suppliers', type: 'supplier', linked: true },
-    { id: 5, name: 'Verma & Sons', type: 'supplier', linked: false },
-  ];
-
+  const contacts = user?.contacts || [];
+  
   const filteredContacts = contacts.filter(c => 
     formData.type === 'sale' ? c.type === 'buyer' : 
     formData.type === 'purchase' ? c.type === 'supplier' : 
     true
   );
 
+  const selectedContact = contacts.find(c => c.id === parseInt(formData.counterpartyId));
+
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+    setError('');
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    if (!formData.counterpartyId) {
+      setError('Please select a contact');
+      return;
+    }
+    
+    if (!formData.amount || parseFloat(formData.amount) <= 0) {
+      setError('Please enter a valid amount');
+      return;
+    }
+    
+    if (!formData.reference) {
+      setError('Please enter a reference/invoice number');
+      return;
+    }
+    
     setIsSubmitting(true);
-    setTimeout(() => {
-      alert('Transaction created successfully!\n\nLedger entries created: Credit & Debit');
-      navigate('/transactions');
+    
+    try {
+      const result = await addTransaction(formData);
+      if (result.success) {
+        alert('Transaction created successfully!\n\nLedger entries created: Credit & Debit');
+        navigate('/transactions');
+      } else {
+        setError(result.error || 'Failed to create transaction');
+      }
+    } catch (error) {
+      setError('Something went wrong. Please try again.');
+    } finally {
       setIsSubmitting(false);
-    }, 1500);
+    }
   };
 
   return (
@@ -121,10 +147,16 @@ const CreateTransaction = () => {
                 <option value="">Select {formData.type === 'sale' ? 'buyer' : formData.type === 'purchase' ? 'supplier' : 'party'}...</option>
                 {filteredContacts.map(contact => (
                   <option key={contact.id} value={contact.id}>
-                    {contact.name} {contact.linked ? '✓ (Linked)' : ''}
+                    {contact.name} {contact.linked ? '✓ (Linked)' : ` (Due: ₹${contact.totalDue.toLocaleString()})`}
                   </option>
                 ))}
               </select>
+              {filteredContacts.length === 0 && (
+                <p className="text-sm text-red-500 mt-1">
+                  No {formData.type === 'sale' ? 'buyers' : formData.type === 'purchase' ? 'suppliers' : 'contacts'} found. 
+                  <Link to="/add-contact" className="text-blue-600 ml-1">Add a contact first</Link>
+                </p>
+              )}
             </div>
 
             {/* Amount */}
@@ -184,40 +216,49 @@ const CreateTransaction = () => {
               />
             </div>
 
+            {/* Error Message */}
+            {error && (
+              <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                <p className="text-red-600 text-sm">{error}</p>
+              </div>
+            )}
+
             {/* Double Entry Preview */}
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <div className="flex gap-3">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-                <div className="flex-1">
-                  <h3 className="font-semibold text-gray-900">Double-Entry Preview</h3>
-                  <div className="text-sm text-gray-700 mt-2 space-y-1">
-                    {formData.type === 'sale' && (
-                      <>
-                        <p>• Your Account: <span className="text-green-600 font-medium">Credit (+₹{parseInt(formData.amount) || 0})</span></p>
-                        <p>• Buyer Account: <span className="text-red-600 font-medium">Debit (-₹{parseInt(formData.amount) || 0})</span></p>
-                        <p className="text-xs text-gray-500 mt-1">The buyer's ledger will be updated automatically if linked.</p>
-                      </>
-                    )}
-                    {formData.type === 'purchase' && (
-                      <>
-                        <p>• Your Account: <span className="text-red-600 font-medium">Debit (-₹{parseInt(formData.amount) || 0})</span></p>
-                        <p>• Supplier Account: <span className="text-green-600 font-medium">Credit (+₹{parseInt(formData.amount) || 0})</span></p>
-                        <p className="text-xs text-gray-500 mt-1">The supplier's ledger will be updated automatically if linked.</p>
-                      </>
-                    )}
-                    {formData.type === 'payment' && (
-                      <>
-                        <p>• Your Account: <span className="text-red-600 font-medium">Debit (-₹{parseInt(formData.amount) || 0})</span></p>
-                        <p>• Party Account: <span className="text-green-600 font-medium">Credit (+₹{parseInt(formData.amount) || 0})</span></p>
-                        <p className="text-xs text-gray-500 mt-1">The party's ledger will be updated automatically if linked.</p>
-                      </>
-                    )}
+            {selectedContact && formData.amount && (
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <div className="flex gap-3">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-gray-900">Double-Entry Preview</h3>
+                    <div className="text-sm text-gray-700 mt-2 space-y-1">
+                      {formData.type === 'sale' && (
+                        <>
+                          <p>• Your Account: <span className="text-green-600 font-medium">Credit (+₹{parseInt(formData.amount) || 0})</span></p>
+                          <p>• {selectedContact.name}: <span className="text-red-600 font-medium">Debit (-₹{parseInt(formData.amount) || 0})</span></p>
+                          <p className="text-xs text-gray-500 mt-1">After this transaction, {selectedContact.name} will owe you ₹{(selectedContact.totalDue + parseInt(formData.amount)).toLocaleString()}</p>
+                        </>
+                      )}
+                      {formData.type === 'purchase' && (
+                        <>
+                          <p>• Your Account: <span className="text-red-600 font-medium">Debit (-₹{parseInt(formData.amount) || 0})</span></p>
+                          <p>• {selectedContact.name}: <span className="text-green-600 font-medium">Credit (+₹{parseInt(formData.amount) || 0})</span></p>
+                          <p className="text-xs text-gray-500 mt-1">After this transaction, you owe {selectedContact.name} ₹{(selectedContact.totalDue + parseInt(formData.amount)).toLocaleString()}</p>
+                        </>
+                      )}
+                      {formData.type === 'payment' && (
+                        <>
+                          <p>• Your Account: <span className="text-red-600 font-medium">Debit (-₹{parseInt(formData.amount) || 0})</span></p>
+                          <p>• {selectedContact.name}: <span className="text-green-600 font-medium">Credit (+₹{parseInt(formData.amount) || 0})</span></p>
+                          <p className="text-xs text-gray-500 mt-1">After this payment, remaining due: ₹{(selectedContact.totalDue - parseInt(formData.amount)).toLocaleString()}</p>
+                        </>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+            )}
 
             {/* Action Buttons */}
             <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
@@ -230,8 +271,8 @@ const CreateTransaction = () => {
               </button>
               <button
                 type="submit"
-                className={`px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors duration-200 flex items-center gap-2 ${isSubmitting ? 'opacity-75 cursor-not-allowed' : ''}`}
-                disabled={isSubmitting}
+                className={`px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors duration-200 flex items-center gap-2 ${isSubmitting || filteredContacts.length === 0 ? 'opacity-75 cursor-not-allowed' : ''}`}
+                disabled={isSubmitting || filteredContacts.length === 0}
               >
                 {isSubmitting ? (
                   <>

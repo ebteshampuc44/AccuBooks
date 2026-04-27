@@ -1,9 +1,32 @@
+// pages/Reports.jsx
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 
 const Reports = () => {
-  const { user } = useAuth();
+  const { user, getTransactionSummary } = useAuth();
   const [period, setPeriod] = useState('month');
+
+  const summary = getTransactionSummary();
+  const contacts = user?.contacts || [];
+  
+  const buyers = contacts.filter(c => c.type === 'buyer');
+  const suppliers = contacts.filter(c => c.type === 'supplier');
+  
+  const totalReceivable = buyers.reduce((sum, c) => sum + (c.totalDue > 0 ? c.totalDue : 0), 0);
+  const totalPayable = suppliers.reduce((sum, c) => sum + (c.totalDue > 0 ? c.totalDue : 0), 0);
+  
+  const grossProfit = summary.sales - summary.purchases;
+  const grossProfitMargin = summary.sales > 0 ? ((grossProfit / summary.sales) * 100).toFixed(1) : 0;
+
+  // Top buyers by sales
+  const topBuyers = [...buyers]
+    .sort((a, b) => b.totalDue - a.totalDue)
+    .slice(0, 3);
+    
+  // Top suppliers by purchases
+  const topSuppliers = [...suppliers]
+    .sort((a, b) => b.totalDue - a.totalDue)
+    .slice(0, 3);
 
   return (
     <div className="space-y-6">
@@ -59,23 +82,23 @@ const Reports = () => {
             <div className="space-y-3">
               <div className="flex justify-between items-center">
                 <span className="text-gray-700">Total Sales Revenue</span>
-                <span className="text-green-600 font-bold text-xl">₹60,000</span>
+                <span className="text-green-600 font-bold text-xl">₹{summary.sales.toLocaleString()}</span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-gray-700">Cost of Purchases</span>
-                <span className="text-red-600 font-bold text-xl">₹20,000</span>
+                <span className="text-red-600 font-bold text-xl">₹{summary.purchases.toLocaleString()}</span>
               </div>
               <div className="border-t border-gray-200 my-2"></div>
               <div className="flex justify-between items-center">
                 <span className="font-bold text-gray-900">Gross Profit</span>
-                <span className="text-blue-600 font-bold text-2xl">₹40,000</span>
+                <span className="text-blue-600 font-bold text-2xl">₹{grossProfit.toLocaleString()}</span>
               </div>
               <div className="text-center mt-3">
                 <span className="inline-flex items-center gap-1 px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-sm">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
                   </svg>
-                  Gross Profit Margin: 66.7%
+                  Gross Profit Margin: {grossProfitMargin}%
                 </span>
               </div>
             </div>
@@ -96,16 +119,16 @@ const Reports = () => {
             <div className="space-y-3">
               <div className="flex justify-between items-center">
                 <span className="text-gray-700">Accounts Receivable (Due from Buyers)</span>
-                <span className="text-green-600 font-bold text-xl">₹70,000</span>
+                <span className="text-green-600 font-bold text-xl">₹{totalReceivable.toLocaleString()}</span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-gray-700">Accounts Payable (Due to Suppliers)</span>
-                <span className="text-red-600 font-bold text-xl">₹35,000</span>
+                <span className="text-red-600 font-bold text-xl">₹{totalPayable.toLocaleString()}</span>
               </div>
               <div className="border-t border-gray-200 my-2"></div>
               <div className="flex justify-between items-center">
                 <span className="font-bold text-gray-900">Net Position</span>
-                <span className="text-blue-600 font-bold text-2xl">₹35,000</span>
+                <span className="text-blue-600 font-bold text-2xl">₹{(totalReceivable - totalPayable).toLocaleString()}</span>
               </div>
             </div>
           </div>
@@ -121,36 +144,30 @@ const Reports = () => {
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-teal-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
               </svg>
-              <h2 className="text-xl font-bold text-gray-900">Top Buyers</h2>
+              <h2 className="text-xl font-bold text-gray-900">Top Buyers (By Due Amount)</h2>
             </div>
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-gray-50 border-b border-gray-200">
-                  <tr>
-                    <th className="text-left py-3 px-4 text-gray-600 font-medium">Buyer</th>
-                    <th className="text-right py-3 px-4 text-gray-600 font-medium">Total Sales</th>
-                    <th className="text-right py-3 px-4 text-gray-600 font-medium">Due Amount</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr className="border-b border-gray-100 hover:bg-gray-50">
-                    <td className="py-3 px-4 font-medium text-gray-900">Raj Traders</td>
-                    <td className="py-3 px-4 text-right text-green-600 font-medium">₹25,000</td>
-                    <td className="py-3 px-4 text-right text-red-600 font-medium">₹15,000</td>
-                  </tr>
-                  <tr className="border-b border-gray-100 hover:bg-gray-50">
-                    <td className="py-3 px-4 font-medium text-gray-900">Gupta Store</td>
-                    <td className="py-3 px-4 text-right text-green-600 font-medium">₹35,000</td>
-                    <td className="py-3 px-4 text-right text-red-600 font-medium">₹25,000</td>
-                  </tr>
-                  <tr className="hover:bg-gray-50">
-                    <td className="py-3 px-4 font-medium text-gray-900">Sharma Enterprises</td>
-                    <td className="py-3 px-4 text-right text-green-600 font-medium">₹10,000</td>
-                    <td className="py-3 px-4 text-right text-green-600 font-medium">₹0</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
+            {topBuyers.length > 0 ? (
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-gray-50 border-b border-gray-200">
+                    <tr>
+                      <th className="text-left py-3 px-4 text-gray-600 font-medium">Buyer</th>
+                      <th className="text-right py-3 px-4 text-gray-600 font-medium">Due Amount</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {topBuyers.map((buyer) => (
+                      <tr key={buyer.id} className="border-b border-gray-100 hover:bg-gray-50">
+                        <td className="py-3 px-4 font-medium text-gray-900">{buyer.name}</td>
+                        <td className="py-3 px-4 text-right text-red-600 font-medium">₹{buyer.totalDue.toLocaleString()}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <p className="text-gray-500 text-center py-4">No buyers added yet</p>
+            )}
           </div>
         </div>
 
@@ -161,36 +178,30 @@ const Reports = () => {
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
               </svg>
-              <h2 className="text-xl font-bold text-gray-900">Top Suppliers</h2>
+              <h2 className="text-xl font-bold text-gray-900">Top Suppliers (By Due Amount)</h2>
             </div>
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-gray-50 border-b border-gray-200">
-                  <tr>
-                    <th className="text-left py-3 px-4 text-gray-600 font-medium">Supplier</th>
-                    <th className="text-right py-3 px-4 text-gray-600 font-medium">Total Purchases</th>
-                    <th className="text-right py-3 px-4 text-gray-600 font-medium">Due Amount</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr className="border-b border-gray-100 hover:bg-gray-50">
-                    <td className="py-3 px-4 font-medium text-gray-900">Singh Suppliers</td>
-                    <td className="py-3 px-4 text-right text-red-600 font-medium">₹20,000</td>
-                    <td className="py-3 px-4 text-right text-green-600 font-medium">₹5,000</td>
-                  </tr>
-                  <tr className="border-b border-gray-100 hover:bg-gray-50">
-                    <td className="py-3 px-4 font-medium text-gray-900">Verma & Sons</td>
-                    <td className="py-3 px-4 text-right text-red-600 font-medium">₹15,000</td>
-                    <td className="py-3 px-4 text-right text-red-600 font-medium">₹10,000</td>
-                  </tr>
-                  <tr className="hover:bg-gray-50">
-                    <td className="py-3 px-4 font-medium text-gray-900">Patel Agency</td>
-                    <td className="py-3 px-4 text-right text-red-600 font-medium">₹5,000</td>
-                    <td className="py-3 px-4 text-right text-green-600 font-medium">₹0</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
+            {topSuppliers.length > 0 ? (
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-gray-50 border-b border-gray-200">
+                    <tr>
+                      <th className="text-left py-3 px-4 text-gray-600 font-medium">Supplier</th>
+                      <th className="text-right py-3 px-4 text-gray-600 font-medium">Due Amount</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {topSuppliers.map((supplier) => (
+                      <tr key={supplier.id} className="border-b border-gray-100 hover:bg-gray-50">
+                        <td className="py-3 px-4 font-medium text-gray-900">{supplier.name}</td>
+                        <td className="py-3 px-4 text-right text-red-600 font-medium">₹{supplier.totalDue.toLocaleString()}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <p className="text-gray-500 text-center py-4">No suppliers added yet</p>
+            )}
           </div>
         </div>
       </div>

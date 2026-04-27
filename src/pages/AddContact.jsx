@@ -1,10 +1,11 @@
+// pages/AddContact.jsx
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
 const AddContact = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, addContact } = useAuth();
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
@@ -13,6 +14,7 @@ const AddContact = () => {
     address: '',
     openingBalance: 0,
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [checkingUser, setCheckingUser] = useState(false);
   const [existingUser, setExistingUser] = useState(null);
 
@@ -24,25 +26,45 @@ const AddContact = () => {
     if (!formData.phone || formData.phone.length < 10) return;
     
     setCheckingUser(true);
-    setTimeout(() => {
-      if (formData.phone === '9876543210' || formData.phone === '9876543211') {
-        setExistingUser({
-          id: formData.phone === '9876543210' ? 2 : 3,
-          name: formData.phone === '9876543210' ? 'Raj Malhotra' : 'Priya Sharma',
-          phone: formData.phone,
-          businessName: formData.phone === '9876543210' ? 'Raj Traders' : 'Sharma Enterprises',
-        });
-      } else {
-        setExistingUser(null);
-      }
-      setCheckingUser(false);
-    }, 1000);
+    // Check if phone already exists in user's contacts
+    const existingContact = user?.contacts?.find(c => c.phone === formData.phone);
+    if (existingContact) {
+      setExistingUser(existingContact);
+    } else {
+      // Simulate API call to check if phone is registered on AccuBooks
+      setTimeout(() => {
+        if (formData.phone === '9876543210' || formData.phone === '9876543211') {
+          setExistingUser({
+            id: formData.phone === '9876543210' ? 999 : 888,
+            name: formData.phone === '9876543210' ? 'Raj Malhotra' : 'Priya Sharma',
+            phone: formData.phone,
+            businessName: formData.phone === '9876543210' ? 'Raj Traders' : 'Sharma Enterprises',
+          });
+        } else {
+          setExistingUser(null);
+        }
+        setCheckingUser(false);
+      }, 1000);
+    }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    alert(`Contact "${formData.name}" added successfully!${existingUser ? ' Would you like to link accounts?' : ''}`);
-    navigate('/contacts');
+    setIsSubmitting(true);
+    
+    try {
+      const result = await addContact(formData);
+      if (result.success) {
+        alert(`Contact "${formData.name}" added successfully!${existingUser ? ' Would you like to link accounts?' : ''}`);
+        navigate('/contacts');
+      } else {
+        alert('Failed to add contact. Please try again.');
+      }
+    } catch (error) {
+      alert('Something went wrong. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const sendLinkRequest = () => {
@@ -81,11 +103,11 @@ const AddContact = () => {
                 </label>
                 <div className="flex gap-2">
                   <div className="relative flex-1">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">+91</span>
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">+880</span>
                     <input
                       type="tel"
                       name="phone"
-                      placeholder="9876543210"
+                      placeholder="1712345678"
                       className="input input-bordered w-full pl-12 border-gray-300 focus:border-blue-500 focus:ring-blue-500 bg-white text-gray-900 placeholder-gray-400"
                       value={formData.phone}
                       onChange={handleChange}
@@ -209,8 +231,9 @@ const AddContact = () => {
               <button 
                 type="submit" 
                 className="btn bg-blue-600 hover:bg-blue-700 text-white border-none"
+                disabled={isSubmitting}
               >
-                Save Contact
+                {isSubmitting ? 'Saving...' : 'Save Contact'}
               </button>
             </div>
           </form>
@@ -227,8 +250,7 @@ const AddContact = () => {
             <div>
               <h3 className="font-bold text-gray-900">Pro Tip</h3>
               <p className="text-sm text-gray-700">
-                If your contact is already an AccuBooks user, you can link accounts for automatic transaction syncing. 
-                This ensures double-entry accounting works seamlessly between both parties.
+                Opening balance will affect your receivable/payable totals. Positive amount means the contact owes you money.
               </p>
             </div>
           </div>

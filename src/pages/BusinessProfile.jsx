@@ -1,3 +1,4 @@
+// pages/BusinessProfile.jsx
 import React, { useState, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -66,7 +67,6 @@ const BusinessProfile = () => {
     if (result.success) {
       setUploadSuccess('Profile picture updated successfully!');
       setPreviewUrl(result.url);
-      // Refresh page after 1 second
       setTimeout(() => {
         window.location.reload();
       }, 1000);
@@ -179,11 +179,6 @@ const BusinessProfile = () => {
             <p className="mt-2 text-xs text-gray-400">
               Click the camera icon to change profile picture (JPEG, PNG, max 5MB)
             </p>
-            
-            {/* Debug info - remove in production */}
-            <div className="mt-2 p-2 bg-gray-100 rounded-lg text-xs w-full">
-              <p className="font-mono break-all">Debug: {user?.photoURL ? 'Has photo' : 'No photo'}</p>
-            </div>
           </div>
 
           {/* Business Information Form */}
@@ -313,8 +308,7 @@ const BusinessProfile = () => {
           <div>
             <h3 className="font-semibold text-gray-900">Profile Information</h3>
             <p className="text-sm text-gray-700 mt-1">
-              Your profile picture is stored in Firebase Storage. Click the camera icon to upload a new picture.
-              Make sure Firebase Storage is enabled in your console.
+              Complete your business profile to get started. You can add contacts and create transactions after saving your business information.
             </p>
           </div>
         </div>
